@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WK 2026 Voorspel-competitie</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #00c853;
+    --green-dark: #009624;
+    --green-pale: #e8f5e9;
+    --red: #e53935;
+    --gold: #ffd600;
+    --gold-dark: #c7a500;
+    --bg: #f7f8fa;
+    --surface: #ffffff;
+    --border: rgba(0,0,0,0.08);
+    --text: #1a1a2e;
+    --text-muted: #6b7280;
+    --radius: 12px;
+    --shadow: 0 2px 12px rgba(0,0,0,0.06);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* HEADER */
+  .header { background: var(--text); color: #fff; padding: 0 1.5rem; display: flex; align-items: center; justify-content: space-between; height: 56px; position: sticky; top: 0; z-index: 100; }
+  .header-logo { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 1px; color: var(--gold); }
+  .header-logo span { color: #fff; }
+  .header-right { display: flex; align-items: center; gap: 10px; }
+  .user-pill { display: flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.1); border-radius: 20px; padding: 4px 12px 4px 6px; font-size: 13px; }
+  .avatar { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; }
+  .btn-logout { background: transparent; border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 5px 10px; border-radius: 6px; font-size: 12px; cursor: pointer; font-family: inherit; }
+  .btn-logout:hover { background: rgba(255,255,255,0.1); }
+
+  /* SCREENS */
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* AUTH */
+  .auth-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--text); padding: 1rem; }
+  .auth-card { background: var(--surface); border-radius: 20px; padding: 2rem; width: 100%; max-width: 380px; }
+  .auth-logo { font-family: 'Bebas Neue', sans-serif; font-size: 36px; color: var(--text); margin-bottom: 4px; }
+  .auth-logo span { color: var(--green); }
+  .auth-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 1.5rem; }
+  .tabs { display: flex; gap: 0; margin-bottom: 1.5rem; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .tab { flex: 1; padding: 8px; text-align: center; font-size: 13px; font-weight: 500; cursor: pointer; background: transparent; border: none; font-family: inherit; color: var(--text-muted); transition: all 0.15s; }
+  .tab.active { background: var(--text); color: #fff; }
+  label { display: block; font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
+  input[type=text], input[type=password], input[type=number], input[type=email] { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; font-family: inherit; background: var(--bg); color: var(--text); margin-bottom: 12px; transition: border-color 0.15s; }
+  input:focus { outline: none; border-color: var(--green); }
+  .btn-primary { width: 100%; padding: 11px; background: var(--green); color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; transition: background 0.15s; }
+  .btn-primary:hover { background: var(--green-dark); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+  .error-msg { color: var(--red); font-size: 12px; margin-bottom: 8px; padding: 8px 10px; background: #fdecea; border-radius: 6px; }
+  .demo-hint { margin-top: 1rem; padding: 10px 12px; background: var(--green-pale); border-radius: 8px; font-size: 12px; color: #2e7d32; line-height: 1.5; }
+
+  /* MAIN LAYOUT */
+  .main-wrap { display: none; }
+  .main-wrap.active { display: block; }
+  .container { max-width: 680px; margin: 0 auto; padding: 1.5rem 1rem; }
+
+  /* NAV TABS */
+  .nav-tabs { display: flex; gap: 4px; background: var(--surface); border-radius: 10px; padding: 4px; border: 1px solid var(--border); margin-bottom: 1.5rem; }
+  .nav-tab { flex: 1; padding: 8px 4px; text-align: center; font-size: 13px; font-weight: 500; cursor: pointer; border-radius: 7px; border: none; background: transparent; font-family: inherit; color: var(--text-muted); transition: all 0.15s; }
+  .nav-tab.active { background: var(--text); color: #fff; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* CARDS */
+  .card { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); padding: 1rem 1.25rem; margin-bottom: 10px; }
+  .card-title { font-size: 13px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 10px; }
+
+  /* INFO BANNER */
+  .info-banner { background: #e8f5e9; border: 1px solid #a5d6a7; border-radius: 10px; padding: 10px 14px; font-size: 13px; color: #2e7d32; margin-bottom: 1rem; display: flex; gap: 8px; align-items: flex-start; }
+
+  /* MATCH ROWS */
+  .group-label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin: 1rem 0 6px; padding-left: 2px; }
+  .match-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); gap: 8px; }
+  .match-row:last-child { border-bottom: none; }
+  .match-teams { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; }
+  .flag { font-size: 18px; flex-shrink: 0; }
+  .team-name { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .match-meta { font-size: 11px; color: var(--text-muted); }
+  .vs { font-size: 11px; color: var(--text-muted); flex-shrink: 0; }
+  .score-inputs { display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
+  .score-input { width: 44px; padding: 6px 4px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; font-weight: 600; text-align: center; font-family: inherit; background: var(--bg); color: var(--text); }
+  .score-input:focus { outline: none; border-color: var(--green); }
+  .score-dash { font-size: 14px; color: var(--text-muted); }
+  .result-score { font-size: 15px; font-weight: 700; color: var(--text); flex-shrink: 0; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; flex-shrink: 0; }
+  .badge-gold { background: #fff8e1; color: var(--gold-dark); }
+  .badge-green { background: #e8f5e9; color: #2e7d32; }
+  .badge-blue { background: #e3f2fd; color: #1565c0; }
+  .badge-gray { background: #f3f4f6; color: var(--text-muted); }
+  .badge-red { background: #fdecea; color: var(--red); }
+
+  /* SAVE BUTTON */
+  .save-row { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
+  .btn-save { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; background: var(--green); color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; transition: background 0.15s; }
+  .btn-save:hover { background: var(--green-dark); }
+  .save-ok { font-size: 13px; color: var(--green); display: none; }
+
+  /* LEADERBOARD */
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1rem; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; text-align: center; }
+  .stat-val { font-family: 'Bebas Neue', sans-serif; font-size: 32px; color: var(--text); line-height: 1; }
+  .stat-lbl { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .lb-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .lb-row:last-child { border-bottom: none; }
+  .lb-rank { font-family: 'Bebas Neue', sans-serif; font-size: 20px; width: 28px; color: var(--text-muted); flex-shrink: 0; }
+  .lb-rank.top { color: var(--gold-dark); }
+  .lb-avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0; }
+  .lb-name { flex: 1; font-size: 14px; font-weight: 500; }
+  .lb-sub { font-size: 11px; color: var(--text-muted); }
+  .lb-pts { font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: var(--green-dark); min-width: 44px; text-align: right; }
+
+  /* ADMIN */
+  .admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+  .btn-action { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border: 1px solid var(--border); border-radius: 8px; background: transparent; font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; color: var(--text); transition: background 0.15s; }
+  .btn-action:hover { background: var(--bg); }
+  .btn-danger { border-color: #fca5a5; color: var(--red); }
+  .btn-danger:hover { background: #fdecea; }
+  select { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; font-family: inherit; background: var(--bg); color: var(--text); margin-bottom: 12px; }
+
+  /* LOADING */
+  .loading { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: var(--text); }
+  .loading-inner { text-align: center; }
+  .loading-logo { font-family: 'Bebas Neue', sans-serif; font-size: 48px; color: var(--gold); margin-bottom: 8px; }
+  .spinner { width: 32px; height: 32px; border: 3px solid rgba(255,255,255,0.2); border-top-color: var(--green); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* FIREBASE STATUS */
+  .fb-status { font-size: 12px; padding: 6px 10px; border-radius: 6px; margin-bottom: 10px; }
+  .fb-status.ok { background: #e8f5e9; color: #2e7d32; }
+  .fb-status.err { background: #fdecea; color: var(--red); }
+
+  @media (max-width: 480px) {
+    .team-name { font-size: 12px; }
+    .match-teams { gap: 4px; }
+    .admin-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOADING SCREEN -->
+<div class="loading" id="loading-screen">
+  <div class="loading-inner">
+    <div class="loading-logo">WK 2026</div>
+    <div class="spinner"></div>
+  </div>
+</div>
+
+<!-- AUTH SCREEN -->
+<div class="screen" id="auth-screen">
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-logo">WK<span>2026</span></div>
+      <div class="auth-sub">Voorspel-competitie met vrienden</div>
+
+      <div id="fb-status-auth"></div>
+
+      <div class="tabs">
+        <button class="tab active" onclick="switchAuth('login')">Inloggen</button>
+        <button class="tab" onclick="switchAuth('register')">Registreren</button>
+      </div>
+
+      <!-- Login -->
+      <div id="login-form">
+        <label>Gebruikersnaam</label>
+        <input type="text" id="login-name" placeholder="Jouw naam">
+        <label>Wachtwoord</label>
+        <input type="password" id="login-pass" placeholder="••••••" onkeydown="if(event.key==='Enter')doLogin()">
+        <div class="error-msg" id="login-error" style="display:none"></div>
+        <button class="btn-primary" onclick="doLogin()" id="login-btn">Inloggen</button>
+        <div class="demo-hint">
+          <strong>Eerste keer?</strong> Registreer een account via het tabje hierboven.<br>
+          De eerste gebruiker die registreert met naam <strong>Admin</strong> wordt automatisch beheerder.
+        </div>
+      </div>
+
+      <!-- Register -->
+      <div id="register-form" style="display:none">
+        <label>Gebruikersnaam</label>
+        <input type="text" id="reg-name" placeholder="Kies een naam">
+        <label>Wachtwoord</label>
+        <input type="password" id="reg-pass" placeholder="Minimaal 4 tekens">
+        <label>Wachtwoord herhalen</label>
+        <input type="password" id="reg-pass2" placeholder="••••••" onkeydown="if(event.key==='Enter')doRegister()">
+        <div class="error-msg" id="reg-error" style="display:none"></div>
+        <button class="btn-primary" onclick="doRegister()" id="reg-btn">Account aanmaken</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div class="main-wrap" id="main-wrap">
+  <div class="header">
+    <div class="header-logo">WK<span>2026</span></div>
+    <div class="header-right">
+      <div class="user-pill">
+        <div class="avatar" id="header-avatar" style="background:#00c853;color:#fff"></div>
+        <span id="header-name" style="font-size:13px"></span>
+      </div>
+      <button class="btn-logout" onclick="doLogout()">Uitloggen</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="nav-tabs">
+      <button class="nav-tab active" onclick="switchTab('voorspellingen')">Voorspellingen</button>
+      <button class="nav-tab" onclick="switchTab('klassement')">Klassement</button>
+      <button class="nav-tab" onclick="switchTab('uitslagen')">Uitslagen</button>
+      <button class="nav-tab" id="admin-tab" style="display:none" onclick="switchTab('admin')">Beheer</button>
+    </div>
+
+    <!-- VOORSPELLINGEN -->
+    <div class="tab-content active" id="tab-voorspellingen">
+      <div class="info-banner">
+        ⚽ Punten: <strong>5</strong> exact &nbsp;•&nbsp; <strong>2</strong> juiste winnaar &nbsp;•&nbsp; <strong>1</strong> gelijkspel geraden
+      </div>
+      <div id="match-list"></div>
+      <div class="save-row">
+        <button class="btn-save" onclick="savePredictions()">💾 Opslaan</button>
+        <span class="save-ok" id="save-ok">✓ Opgeslagen!</span>
+      </div>
+    </div>
+
+    <!-- KLASSEMENT -->
+    <div class="tab-content" id="tab-klassement">
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-val" id="stat-players">–</div>
+          <div class="stat-lbl">Deelnemers</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" id="stat-played">–</div>
+          <div class="stat-lbl">Gespeeld</div>
+        </div>
+      </div>
+      <div class="card">
+        <div id="leaderboard"><div style="text-align:center;padding:2rem;color:var(--text-muted);font-size:14px">Laden…</div></div>
+      </div>
+    </div>
+
+    <!-- UITSLAGEN -->
+    <div class="tab-content" id="tab-uitslagen">
+      <div class="card">
+        <div class="card-title">Officiële uitslagen</div>
+        <div id="results-list"></div>
+      </div>
+    </div>
+
+    <!-- ADMIN -->
+    <div class="tab-content" id="tab-admin">
+      <div class="card">
+        <div class="card-title">Uitslag invoeren</div>
+        <label>Wedstrijd</label>
+        <select id="admin-match-sel" onchange="updateAdminLabels()"></select>
+        <div class="admin-grid">
+          <div>
+            <label id="admin-home-lbl">Thuis</label>
+            <input type="number" id="admin-home" min="0" max="20" placeholder="0">
+          </div>
+          <div>
+            <label id="admin-away-lbl">Uit</label>
+            <input type="number" id="admin-away" min="0" max="20" placeholder="0">
+          </div>
+        </div>
+        <button class="btn-save" onclick="saveResult()">✓ Uitslag opslaan</button>
+        <div class="save-ok" id="admin-ok" style="margin-top:6px">✓ Opgeslagen & punten herberekend!</div>
+      </div>
+
+      <div class="card" style="margin-top:10px">
+        <div class="card-title">Deelnemers</div>
+        <div id="admin-users"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================
+     FIREBASE SDK (v10 modular via CDN)
+     ========================================== -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getFirestore, doc, setDoc, getDoc, getDocs,
+  collection, onSnapshot, deleteDoc
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+// ============================================
+// ← PLAK HIER JOUW FIREBASE CONFIG
+// ============================================
+const firebaseConfig = {
+  apiKey: "AIzaSyBNL3o0DPB13f1sWNIlwmUxAWA3ZbGUM-s",
+  authDomain: "wk2026-ad6c8.firebaseapp.com",
+  projectId: "wk2026-ad6c8",
+  storageBucket: "wk2026-ad6c8.firebasestorage.app",
+  messagingSenderId: "230331076765",
+  appId: "1:230331076765:web:7b36f3d6daf6ceafcd4474"
+};
+// ============================================
+
+const MATCHES = [
+  {id:"m01",home:"Mexico",away:"Ecuador",fh:"🇲🇽",fa:"🇪🇨",group:"A",date:"12 jun"},
+  {id:"m02",home:"Nederland",away:"Argentinië",fh:"🇳🇱",fa:"🇦🇷",group:"A",date:"13 jun"},
+  {id:"m03",home:"Duitsland",away:"Japan",fh:"🇩🇪",fa:"🇯🇵",group:"B",date:"13 jun"},
+  {id:"m04",home:"Spanje",away:"Marokko",fh:"🇪🇸",fa:"🇲🇦",group:"B",date:"14 jun"},
+  {id:"m05",home:"Engeland",away:"Brazilië",fh:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",fa:"🇧🇷",group:"C",date:"14 jun"},
+  {id:"m06",home:"Frankrijk",away:"Portugal",fh:"🇫🇷",fa:"🇵🇹",group:"C",date:"15 jun"},
+  {id:"m07",home:"België",away:"USA",fh:"🇧🇪",fa:"🇺🇸",group:"D",date:"15 jun"},
+  {id:"m08",home:"Canada",away:"Australië",fh:"🇨🇦",fa:"🇦🇺",group:"D",date:"16 jun"},
+  {id:"m09",home:"Senegal",away:"Ecuador",fh:"🇸🇳",fa:"🇪🇨",group:"A",date:"17 jun"},
+  {id:"m10",home:"Polen",away:"Saudi-Arabië",fh:"🇵🇱",fa:"🇸🇦",group:"E",date:"17 jun"},
+  {id:"m11",home:"Kroatië",away:"Albanië",fh:"🇭🇷",fa:"🇦🇱",group:"F",date:"18 jun"},
+  {id:"m12",home:"Uruguay",away:"Zuid-Korea",fh:"🇺🇾",fa:"🇰🇷",group:"G",date:"18 jun"},
+];
+
+const AVATAR_COLORS = [
+  ["#d1fae5","#065f46"],["#dbeafe","#1e40af"],["#fef3c7","#92400e"],
+  ["#fce7f3","#9d174d"],["#ede9fe","#4c1d95"],["#fee2e2","#991b1b"],
+];
+
+let app, db, currentUser = null, currentUid = null;
+let allUsers = {}, allPredictions = {}, allResults = {};
+let configOk = false;
+
+// Check if config is filled in
+function checkConfig() {
+  return firebaseConfig.apiKey && firebaseConfig.apiKey !== "JOUW_API_KEY";
+}
+
+async function init() {
+  document.getElementById("loading-screen").style.display = "none";
+
+  if (!checkConfig()) {
+    document.getElementById("auth-screen").classList.add("active");
+    showFbStatus("auth",
+      "⚠️ Firebase nog niet gekoppeld — vul jouw firebaseConfig in het HTML-bestand in (zoek op JOUW_API_KEY).",
+      "err"
+    );
+    // Run in demo mode without Firebase
+    runDemoMode();
+    return;
+  }
+
+  try {
+    app = initializeApp(firebaseConfig);
+    db = getFirestore(app);
+    configOk = true;
+    document.getElementById("auth-screen").classList.add("active");
+    showFbStatus("auth", "✓ Verbonden met Firebase", "ok");
+    setupRealtimeListeners();
+  } catch(e) {
+    document.getElementById("auth-screen").classList.add("active");
+    showFbStatus("auth", "Firebase fout: " + e.message, "err");
+    runDemoMode();
+  }
+}
+
+function showFbStatus(where, msg, type) {
+  const el = document.getElementById("fb-status-"+where);
+  if (!el) return;
+  el.className = "fb-status " + type;
+  el.textContent = msg;
+  el.style.display = "";
+}
+
+// ── REALTIME LISTENERS ──────────────────────
+function setupRealtimeListeners() {
+  if (!db) return;
+  onSnapshot(collection(db, "users"), snap => {
+    allUsers = {};
+    snap.forEach(d => allUsers[d.id] = d.data());
+    if (currentUid) { renderAll(); }
+  });
+  onSnapshot(collection(db, "predictions"), snap => {
+    allPredictions = {};
+    snap.forEach(d => {
+      const [uid, mid] = d.id.split("__");
+      if (!allPredictions[uid]) allPredictions[uid] = {};
+      allPredictions[uid][mid] = d.data();
+    });
+    if (currentUid) renderAll();
+  });
+  onSnapshot(collection(db, "results"), snap => {
+    allResults = {};
+    snap.forEach(d => allResults[d.id] = d.data());
+    if (currentUid) renderAll();
+  });
+}
+
+// ── AUTH ─────────────────────────────────────
+window.switchAuth = (mode) => {
+  document.querySelectorAll(".tabs .tab").forEach((t,i) =>
+    t.classList.toggle("active", i === (mode==="login"?0:1)));
+  document.getElementById("login-form").style.display = mode==="login" ? "" : "none";
+  document.getElementById("register-form").style.display = mode==="register" ? "" : "none";
+};
+
+window.doLogin = async () => {
+  const name = document.getElementById("login-name").value.trim();
+  const pass = document.getElementById("login-pass").value;
+  const errEl = document.getElementById("login-error");
+  const btn = document.getElementById("login-btn");
+
+  if (!name || !pass) { showErr("login-error","Vul naam en wachtwoord in."); return; }
+  btn.disabled = true; btn.textContent = "Bezig…";
+
+  try {
+    if (configOk) {
+      const uid = name.toLowerCase().replace(/\s+/g,"_");
+      const snap = await getDoc(doc(db,"users",uid));
+      if (!snap.exists() || snap.data().pass !== pass) {
+        showErr("login-error","Onjuiste naam of wachtwoord.");
+        btn.disabled=false; btn.textContent="Inloggen"; return;
+      }
+      loginUser(uid, snap.data());
+    } else {
+      demoLogin(name, pass);
+    }
+  } catch(e) {
+    showErr("login-error", "Fout: " + e.message);
+  }
+  btn.disabled=false; btn.textContent="Inloggen";
+};
+
+window.doRegister = async () => {
+  const name = document.getElementById("reg-name").value.trim();
+  const pass = document.getElementById("reg-pass").value;
+  const pass2 = document.getElementById("reg-pass2").value;
+  const btn = document.getElementById("reg-btn");
+
+  if (!name) { showErr("reg-error","Vul een naam in."); return; }
+  if (pass.length < 4) { showErr("reg-error","Wachtwoord minimaal 4 tekens."); return; }
+  if (pass !== pass2) { showErr("reg-error","Wachtwoorden komen niet overeen."); return; }
+
+  btn.disabled=true; btn.textContent="Bezig…";
+
+  try {
+    if (configOk) {
+      const uid = name.toLowerCase().replace(/\s+/g,"_");
+      const snap = await getDoc(doc(db,"users",uid));
+      if (snap.exists()) { showErr("reg-error","Deze naam is al bezet."); btn.disabled=false; btn.textContent="Account aanmaken"; return; }
+      const allSnap = await getDocs(collection(db,"users"));
+      const isAdmin = allSnap.empty || name.toLowerCase()==="admin";
+      const userData = { name, pass, isAdmin, createdAt: Date.now() };
+      await setDoc(doc(db,"users",uid), userData);
+      loginUser(uid, userData);
+    } else {
+      demoRegister(name, pass);
+    }
+  } catch(e) {
+    showErr("reg-error","Fout: " + e.message);
+  }
+  btn.disabled=false; btn.textContent="Account aanmaken";
+};
+
+function loginUser(uid, userData) {
+  currentUser = userData;
+  currentUid = uid;
+  document.getElementById("auth-screen").classList.remove("active");
+  document.getElementById("main-wrap").classList.add("active");
+  const initials = userData.name.substring(0,2).toUpperCase();
+  const [bg, col] = AVATAR_COLORS[Object.keys(allUsers).indexOf(uid) % AVATAR_COLORS.length] || AVATAR_COLORS[0];
+  const av = document.getElementById("header-avatar");
+  av.textContent = initials; av.style.background = bg; av.style.color = col;
+  document.getElementById("header-name").textContent = userData.name;
+  if (userData.isAdmin) document.getElementById("admin-tab").style.display = "";
+  renderAll();
+}
+
+window.doLogout = () => {
+  currentUser = null; currentUid = null;
+  document.getElementById("main-wrap").classList.remove("active");
+  document.getElementById("auth-screen").classList.add("active");
+  document.getElementById("admin-tab").style.display = "none";
+  document.getElementById("login-name").value = "";
+  document.getElementById("login-pass").value = "";
+};
+
+// ── PREDICTIONS ──────────────────────────────
+window.savePredictions = async () => {
+  if (!currentUid) return;
+  const btn = document.querySelector(".btn-save");
+  btn.disabled = true;
+
+  for (const m of MATCHES) {
+    if (allResults[m.id]) continue;
+    const h = document.getElementById("ph-"+m.id);
+    const a = document.getElementById("pa-"+m.id);
+    if (h && a && h.value !== "" && a.value !== "") {
+      const pred = { home: parseInt(h.value), away: parseInt(a.value), uid: currentUid, updatedAt: Date.now() };
+      if (configOk) {
+        await setDoc(doc(db,"predictions",currentUid+"__"+m.id), pred);
+      } else {
+        if (!allPredictions[currentUid]) allPredictions[currentUid] = {};
+        allPredictions[currentUid][m.id] = pred;
+      }
+    }
+  }
+  btn.disabled = false;
+  const ok = document.getElementById("save-ok");
+  ok.style.display = ""; setTimeout(()=>ok.style.display="none",2500);
+  renderMatchList();
+};
+
+// ── RESULTS (admin) ───────────────────────────
+window.saveResult = async () => {
+  const mid = document.getElementById("admin-match-sel").value;
+  const h = parseInt(document.getElementById("admin-home").value);
+  const a = parseInt(document.getElementById("admin-away").value);
+  if (isNaN(h)||isNaN(a)) return;
+  const result = { home:h, away:a, savedAt: Date.now() };
+  if (configOk) {
+    await setDoc(doc(db,"results",mid), result);
+  } else {
+    allResults[mid] = result;
+  }
+  const ok = document.getElementById("admin-ok");
+  ok.style.display=""; setTimeout(()=>ok.style.display="none",3000);
+  renderAll();
+};
+
+window.removeUser = async (uid) => {
+  if (!confirm("Verwijder deze deelnemer?")) return;
+  if (configOk) {
+    await deleteDoc(doc(db,"users",uid));
+  } else {
+    delete allUsers[uid];
+    delete allPredictions[uid];
+  }
+  renderAdmin();
+};
+
+// ── POINTS ────────────────────────────────────
+function calcPoints(uid) {
+  let total = 0;
+  const preds = allPredictions[uid] || {};
+  for (const [mid, pred] of Object.entries(preds)) {
+    const res = allResults[mid];
+    if (!res) continue;
+    const ph=pred.home, pa=pred.away, rh=res.home, ra=res.away;
+    if (ph===rh && pa===ra) { total+=5; continue; }
+    const pw=ph>pa?1:ph<pa?-1:0, rw=rh>ra?1:rh<ra?-1:0;
+    if (pw===rw) total += pw===0 ? 1 : 2;
+  }
+  return total;
+}
+
+function calcMatchPoints(uid, mid) {
+  const pred = (allPredictions[uid]||{})[mid];
+  const res = allResults[mid];
+  if (!pred||!res) return null;
+  const ph=pred.home, pa=pred.away, rh=res.home, ra=res.away;
+  if (ph===rh && pa===ra) return 5;
+  const pw=ph>pa?1:ph<pa?-1:0, rw=rh>ra?1:rh<ra?-1:0;
+  if (pw===rw) return pw===0 ? 1 : 2;
+  return 0;
+}
+
+// ── RENDER ────────────────────────────────────
+function renderAll() {
+  renderMatchList();
+  renderLeaderboard();
+  renderResults();
+  if (currentUser?.isAdmin) renderAdmin();
+}
+
+function renderMatchList() {
+  const preds = allPredictions[currentUid] || {};
+  let html = ""; let group = "";
+  for (const m of MATCHES) {
+    if (m.group !== group) {
+      html += `<div class="group-label">Groep ${m.group}</div><div class="card" style="padding:0 1.25rem">`;
+      group = m.group;
+    }
+    const res = allResults[m.id];
+    const pred = preds[m.id];
+    const ph = pred ? pred.home : "";
+    const pa = pred ? pred.away : "";
+    const locked = res !== undefined;
+    let pts = "";
+    if (locked && pred !== undefined) {
+      const p = calcMatchPoints(currentUid, m.id);
+      const cls = p===5?"badge-gold":p>=2?"badge-green":p===1?"badge-blue":"badge-red";
+      pts = `<span class="badge ${cls}">${p}pt</span>`;
+    }
+    html += `<div class="match-row">
+      <div class="match-teams">
+        <span class="flag">${m.fh}</span>
+        <div><div class="team-name">${m.home}</div><div class="match-meta">${m.date} · Gr.${m.group}</div></div>
+        <span class="vs">vs</span>
+        <span class="flag">${m.fa}</span>
+        <div class="team-name">${m.away}</div>
+      </div>
+      ${locked
+        ? `<span class="result-score">${res.home}–${res.away}</span>${pts}`
+        : `<div class="score-inputs">
+            <input type="number" class="score-input" id="ph-${m.id}" value="${ph}" min="0" max="20" placeholder="–">
+            <span class="score-dash">–</span>
+            <input type="number" class="score-input" id="pa-${m.id}" value="${pa}" min="0" max="20" placeholder="–">
+           </div>`
+      }
+    </div>`;
+
+    // Close card when group changes or at end
+    const next = MATCHES[MATCHES.indexOf(m)+1];
+    if (!next || next.group !== m.group) html += "</div>";
+  }
+  document.getElementById("match-list").innerHTML = html;
+}
+
+function renderLeaderboard() {
+  const uids = Object.keys(allUsers);
+  const scores = uids.map(uid => ({
+    uid, name: allUsers[uid].name,
+    pts: calcPoints(uid),
+    preds: Object.keys(allPredictions[uid]||{}).length
+  })).sort((a,b) => b.pts-a.pts);
+
+  document.getElementById("stat-players").textContent = uids.length;
+  document.getElementById("stat-played").textContent = Object.keys(allResults).length;
+
+  const medals = ["🥇","🥈","🥉"];
+  let html = "";
+  scores.forEach((s,i) => {
+    const [bg,col] = AVATAR_COLORS[uids.indexOf(s.uid) % AVATAR_COLORS.length] || AVATAR_COLORS[0];
+    html += `<div class="lb-row">
+      <div class="lb-rank ${i<3?'top':''}">${medals[i]||i+1}</div>
+      <div class="lb-avatar" style="background:${bg};color:${col}">${s.name.substring(0,2).toUpperCase()}</div>
+      <div style="flex:1">
+        <div class="lb-name">${s.name}</div>
+        <div class="lb-sub">${s.preds} voorspelling${s.preds!==1?"en":""}</div>
+      </div>
+      <div class="lb-pts">${s.pts}</div>
+    </div>`;
+  });
+  document.getElementById("leaderboard").innerHTML = html || `<div style="text-align:center;padding:2rem;color:var(--text-muted);font-size:14px">Nog geen deelnemers</div>`;
+}
+
+function renderResults() {
+  let html = "";
+  for (const m of MATCHES) {
+    const res = allResults[m.id];
+    html += `<div class="match-row">
+      <div class="match-teams">
+        <span class="flag">${m.fh}</span>
+        <span class="team-name">${m.home}</span>
+        <span class="vs">vs</span>
+        <span class="flag">${m.fa}</span>
+        <span class="team-name">${m.away}</span>
+      </div>
+      ${res!==undefined
+        ? `<span class="result-score">${res.home}–${res.away}</span>`
+        : `<span class="badge badge-gray">Nog te spelen</span>`}
+    </div>`;
+  }
+  document.getElementById("results-list").innerHTML = html;
+}
+
+window.updateAdminLabels = () => {
+  const mid = document.getElementById("admin-match-sel").value;
+  const m = MATCHES.find(x=>x.id===mid);
+  if (!m) return;
+  document.getElementById("admin-home-lbl").textContent = m.fh+" "+m.home;
+  document.getElementById("admin-away-lbl").textContent = m.fa+" "+m.away;
+  const res = allResults[mid];
+  document.getElementById("admin-home").value = res ? res.home : "";
+  document.getElementById("admin-away").value = res ? res.away : "";
+};
+
+function renderAdmin() {
+  // Match select
+  let opts = MATCHES.map(m=>`<option value="${m.id}">${m.fh} ${m.home} vs ${m.away} ${m.fa} (${m.date})</option>`).join("");
+  document.getElementById("admin-match-sel").innerHTML = opts;
+  updateAdminLabels();
+
+  // Users list
+  let html = "";
+  Object.entries(allUsers).forEach(([uid, u]) => {
+    const [bg,col] = AVATAR_COLORS[Object.keys(allUsers).indexOf(uid)%AVATAR_COLORS.length]||AVATAR_COLORS[0];
+    html += `<div class="lb-row">
+      <div class="lb-avatar" style="background:${bg};color:${col}">${u.name.substring(0,2).toUpperCase()}</div>
+      <div style="flex:1">
+        <div class="lb-name">${u.name}</div>
+        <div class="lb-sub">${u.isAdmin?"Beheerder":"Deelnemer"} · ${calcPoints(uid)} punten</div>
+      </div>
+      ${uid!==currentUid?`<button class="btn-action btn-danger" onclick="removeUser('${uid}')">Verwijder</button>`:""}
+    </div>`;
+  });
+  document.getElementById("admin-users").innerHTML = html || "<div style='color:var(--text-muted);font-size:14px;padding:1rem 0'>Geen deelnemers</div>";
+}
+
+// ── TABS ──────────────────────────────────────
+window.switchTab = (name) => {
+  document.querySelectorAll(".tab-content").forEach(el=>el.classList.remove("active"));
+  document.querySelectorAll(".nav-tab").forEach(t=>t.classList.remove("active"));
+  document.getElementById("tab-"+name).classList.add("active");
+  document.querySelectorAll(".nav-tab").forEach(t=>{
+    if(t.getAttribute("onclick")?.includes(name)) t.classList.add("active");
+  });
+};
+
+// ── HELPERS ───────────────────────────────────
+function showErr(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg; el.style.display = "";
+}
+
+// ── DEMO MODE (geen Firebase config) ─────────
+function runDemoMode() {
+  allUsers = {
+    "admin":   {name:"Admin",   pass:"admin123", isAdmin:true},
+    "jan":     {name:"Jan",     pass:"jan123",   isAdmin:false},
+    "lisa":    {name:"Lisa",    pass:"lisa123",  isAdmin:false},
+  };
+  allPredictions = {
+    "jan":  {"m01":{home:2,away:1},"m02":{home:1,away:0},"m05":{home:2,away:2}},
+    "lisa": {"m01":{home:1,away:0},"m02":{home:2,away:1},"m03":{home:1,away:1}},
+  };
+  allResults = { "m01":{home:2,away:1}, "m03":{home:1,away:1} };
+}
+
+function demoLogin(name, pass) {
+  const uid = name.toLowerCase().replace(/\s+/g,"_");
+  const user = allUsers[uid];
+  if (!user || user.pass !== pass) { showErr("login-error","Onjuiste naam of wachtwoord."); return; }
+  loginUser(uid, user);
+}
+
+function demoRegister(name, pass) {
+  const uid = name.toLowerCase().replace(/\s+/g,"_");
+  if (allUsers[uid]) { showErr("reg-error","Deze naam is al bezet."); return; }
+  const isAdmin = Object.keys(allUsers).length === 0 || name.toLowerCase()==="admin";
+  allUsers[uid] = { name, pass, isAdmin };
+  loginUser(uid, allUsers[uid]);
+}
+
+// ── START ─────────────────────────────────────
+init();
+</script>
+</body>
+</html>
