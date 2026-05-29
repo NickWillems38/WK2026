@@ -190,6 +190,11 @@
         <div class="save-ok" id="admin-ok" style="margin-top:6px">✓ Opgeslagen!</div>
       </div>
       <div class="card" style="margin-top:10px">
+        <div class="card-title">Uitslagen resetten</div>
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:10px">Verwijder een verkeerd ingevoerde uitslag. Punten worden automatisch herberekend.</p>
+        <div id="reset-list"></div>
+      </div>
+      <div class="card" style="margin-top:10px">
         <div class="card-title">Deelnemers</div>
         <div id="admin-users"></div>
       </div>
@@ -461,6 +466,14 @@ window.saveResult=async()=>{
   renderAll();
 };
 
+window.resetResult=async(mid)=>{
+  const m=MATCHES.find(x=>x.id===mid);
+  if(!m)return;
+  if(!confirm(`Uitslag van ${m.home} vs ${m.away} verwijderen? Alle punten worden herberekend.`))return;
+  if(configOk){await deleteDoc(doc(db,"results",mid));}else{delete allResults[mid];}
+  renderAll();
+};
+
 window.removeUser=async(uid)=>{
   if(!confirm("Verwijder deze deelnemer?"))return;
   if(configOk){await deleteDoc(doc(db,"users",uid));}else{delete allUsers[uid];delete allPredictions[uid];}
@@ -584,6 +597,27 @@ window.updateAdminLabels=()=>{
 function renderAdmin(){
   document.getElementById("admin-match-sel").innerHTML=MATCHES.map(m=>`<option value="${m.id}">${m.fh} ${m.home} vs ${m.away} ${m.fa} (${m.date})</option>`).join("");
   updateAdminLabels();
+
+  // Reset-lijst: alleen wedstrijden met een ingevoerde uitslag
+  const played=MATCHES.filter(m=>allResults[m.id]!==undefined);
+  let resetHtml="";
+  if(played.length===0){
+    resetHtml=`<div style="font-size:13px;color:var(--text-muted);padding:4px 0">Nog geen uitslagen ingevoerd.</div>`;
+  } else {
+    played.forEach(m=>{
+      const res=allResults[m.id];
+      resetHtml+=`<div class="lb-row">
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:500">${m.fh} ${m.home} <span style="color:var(--text-muted);font-weight:400">vs</span> ${m.away} ${m.fa}</div>
+          <div style="font-size:12px;color:var(--text-muted)">${m.date} · Groep ${m.group}</div>
+        </div>
+        <span style="font-size:15px;font-weight:700;margin-right:12px">${res.home}–${res.away}</span>
+        <button class="btn-action btn-danger" onclick="resetResult('${m.id}')">🗑 Reset</button>
+      </div>`;
+    });
+  }
+  document.getElementById("reset-list").innerHTML=resetHtml;
+
   let html="";
   Object.entries(allUsers).forEach(([uid,u])=>{
     const[bg,col]=AVATAR_COLORS[Object.keys(allUsers).indexOf(uid)%AVATAR_COLORS.length]||AVATAR_COLORS[0];
