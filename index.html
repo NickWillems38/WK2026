@@ -338,14 +338,11 @@ function checkConfig() {
 async function init() {
   document.getElementById("loading-screen").style.display = "none";
 
-  if (!checkConfig()) {
-    document.getElementById("auth-screen").classList.add("active");
-    showFbStatus("auth",
-      "⚠️ Firebase nog niet gekoppeld — vul jouw firebaseConfig in het HTML-bestand in (zoek op JOUW_API_KEY).",
-      "err"
-    );
-    // Run in demo mode without Firebase
-    runDemoMode();
+  if (currentUid) {
+    // Sessie al actief — toon direct de app
+    document.getElementById("main-wrap").classList.add("active");
+    if (currentUser.isAdmin) document.getElementById("admin-tab").style.display = "";
+    // Wacht op Firebase data, render daarna
     return;
   }
 
@@ -464,6 +461,8 @@ window.doRegister = async () => {
 function loginUser(uid, userData) {
   currentUser = userData;
   currentUid = uid;
+  sessionStorage.setItem("wk_uid", uid);        
+  sessionStorage.setItem("wk_user", JSON.stringify(userData));
   document.getElementById("auth-screen").classList.remove("active");
   document.getElementById("main-wrap").classList.add("active");
   const initials = userData.name.substring(0,2).toUpperCase();
@@ -476,6 +475,8 @@ function loginUser(uid, userData) {
 }
 
 window.doLogout = () => {
+  sessionStorage.removeItem("wk_uid");    
+  sessionStorage.removeItem("wk_user");   
   currentUser = null; currentUid = null;
   document.getElementById("main-wrap").classList.remove("active");
   document.getElementById("auth-screen").classList.add("active");
@@ -743,6 +744,14 @@ function demoRegister(name, pass) {
 }
 
 // ── START ─────────────────────────────────────
+// Herstel sessie na refresh
+const savedUid = sessionStorage.getItem("wk_uid");
+const savedUser = sessionStorage.getItem("wk_user");
+if (savedUid && savedUser) {
+  currentUser = JSON.parse(savedUser);
+  currentUid = savedUid;
+}
+  
 init();
 </script>
 </body>
