@@ -336,15 +336,21 @@ function checkConfig() {
 }
 
 async function init() {
-  document.getElementById("loading-screen").style.display = "none";
-
-  if (currentUid) {
-    // Sessie al actief — toon direct de app
-    document.getElementById("main-wrap").classList.add("active");
-    if (currentUser.isAdmin) document.getElementById("admin-tab").style.display = "";
-    // Wacht op Firebase data, render daarna
+  document.getElementById("loading-screen").style.display="none";
+  if(!checkConfig()){
+    runDemoMode();
+    if(currentUid){
+      // Sessie actief in demo-modus
+      document.getElementById("main-wrap").classList.add("active");
+      if(currentUser.isAdmin)document.getElementById("admin-tab").style.display="";
+      renderAll();
+    } else {
+      document.getElementById("auth-screen").classList.add("active");
+      showFbStatus("auth","⚠️ Demo-modus: vul jouw Firebase config in het bestand in (zoek op JOUW_API_KEY)","err");
+    }
     return;
   }
+
 
   try {
     app = initializeApp(firebaseConfig);
